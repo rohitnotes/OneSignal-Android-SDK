@@ -40,18 +40,19 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
+import com.onesignal.OSNotificationGenerationJob.AppNotificationGenerationJob;
+import com.onesignal.OSNotificationGenerationJob.ExtNotificationGenerationJob;
 import com.onesignal.OneSignalDbContract.NotificationTable;
 import com.onesignal.influence.data.OSTrackerFactory;
 import com.onesignal.influence.domain.OSInfluence;
 import com.onesignal.outcomes.data.OSOutcomeEventsFactory;
-import com.onesignal.OSNotificationGenerationJob.AppNotificationGenerationJob;
-import com.onesignal.OSNotificationGenerationJob.ExtNotificationGenerationJob;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,10 +71,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.onesignal.NotificationBundleProcessor.newJsonArray;
-
 import static com.onesignal.GenerateNotification.BUNDLE_KEY_ACTION_ID;
 import static com.onesignal.GenerateNotification.BUNDLE_KEY_ANDROID_NOTIFICATION_ID;
+import static com.onesignal.NotificationBundleProcessor.newJsonArray;
 
 /**
  * The main OneSignal class - this is where you will interface with the OneSignal SDK
@@ -543,12 +543,11 @@ public class OneSignal {
    }
    // End EmailSubscriptionState
 
-   private static OSDevice userDevice;
+   @Nullable
    public static OSDevice getUserDevice() {
-      if (userDevice == null)
-         userDevice = new OSDevice();
-
-      return userDevice;
+      if (getPermissionSubscriptionState() == null)
+         return null;
+      return new OSDevice(getPermissionSubscriptionState());
    }
 
    private static class IAPUpdateJob {
@@ -2956,7 +2955,7 @@ public class OneSignal {
     */
    public static OSPermissionSubscriptionState getPermissionSubscriptionState() {
 
-      //if applicable, check if the user provided privacy consent
+      // If applicable, check if the user provided privacy consent
       if (shouldLogUserPrivacyConsentErrorMessageForMethodName("getPermissionSubscriptionState()"))
          return null;
 
